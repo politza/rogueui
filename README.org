@@ -1,0 +1,53 @@
+* Introduction
+
+  *rogueui* is a mod for the game [[https://www.kleientertainment.com/games/invisible-inc][Invisible, Inc.]], a turn-based
+   tactical stealth game in the world of espionage, with a rogueu-like
+   component.
+
+   The sole focus of this mod is on the user-interface, which is
+   stream-lined in various ways:
+
+   + disable \"I am ready\" screen
+   + disable intro video
+   + disable first alarm tip pop-up
+   + disable mission start confirmatiton
+   + disable mission objectives popup
+   + disable mission dialog pop-ups
+   + disable agency screen voice-over
+   + disable all ingame voice-over
+   + disable map scripts
+   + remember selected agency
+
+   These features may be enabled or disabled in the in-game options
+   menu.
+
+* Install
+
+  If you're paranoid, first create a backup of your game's folder.
+  Though no files should be overriden by the installation.
+
+** Unix like
+
+   Run /make/ in the root directory and extract the created tar from
+   the dist directory into the game's root-directory. No files should
+   be overridden by this operation.
+
+   A 5th tab named *ROGUEUI* should appear in the game's option menu.
+
+** Other 
+
+   1. Create a zip archive named /scripts.zip/ containing the
+      following files from the mod's root directory:
+
+      - rogueui.lua
+      - modinit.lua
+      - README
+
+   2. Create the path /$INVISIBLE\/game\/dlc\/rogueui/, whereby
+      $INVISIBLE should be the game's install directory.
+
+   3. Move the zip archive (/scripts.zip/) into this folder.
+
+* Uninstall
+
+  Remove the directory /$INVISIBLE\/game\/dlc\/rogueui/ .
