@@ -364,15 +364,6 @@ local function onClickCampaign(self)
       end
    end
 
-   -- Remember selected agency.
-   -- FIXME: Returning to the campaign screen does not save it.
-   local settingsFile = savefiles.getSettings ("settings")
-   rogueui.selected_agency = { agents = self._selectedAgents,
-				loadouts = self._selectedLoadouts,
-				programs = self._selectedPrograms }
-   settingsFile.data.rogueui.selected_agency = rogueui.selected_agency
-   settingsFile:save()
-
    local selectedAgency = serverdefs.createAgency( agentIDs, programIDs )
    local campaign = serverdefs.createNewCampaign( selectedAgency,
 						  self._campaignDifficulty, self._campaignOptions )
@@ -398,12 +389,31 @@ end
 
 rogueui.originals.teamPreview = {onLoad = teamPreview.onLoad}
 
+-- Remember selected agency.
+-- FIXME: Returning to the campaign screen does not save it.
+local function save_selected_agency (dialog)
+   local settingsFile = savefiles.getSettings ("settings")
+   rogueui.selected_agency = { agents = dialog._selectedAgents,
+			       loadouts = dialog._selectedLoadouts,
+			       programs = dialog._selectedPrograms }
+   settingsFile.data.rogueui.selected_agency = rogueui.selected_agency
+   settingsFile:save()
+end
+
 teamPreview.onLoad = function (self)
    rogueui.originals.teamPreview.onLoad(self)
-   if rogueui.settings.disable_i_am_ready_screen.value then
-      self._panel.binder.acceptBtn.onClick._fn = onClickCampaign
-   end
 
+   local original_handler = self._panel.binder.acceptBtn.onClick._fn
+   self._panel.binder.acceptBtn.onClick._fn =
+      function ()
+	 save_selected_agency (self)
+	 if rogueui.settings.disable_i_am_ready_screen.value then
+	    onClickCampaign (self)
+	 else
+	    original_handler (self)
+	 end
+      end
+   
    if not rogueui.settings.enable_save_selected_agency.value
    or not rogueui.selected_agency then
       return
