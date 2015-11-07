@@ -402,6 +402,12 @@ teamPreview.onLoad = function (self)
 	 select_agent (self, agents[i])
 	 select_loadout (self, i, loadouts[i])
       end
+      -- Stop central's voice-over
+      MOAIFmodDesigner.stopSound("voice")
+      if self._voiceCoroutine then
+	 self._voiceCoroutine:stop()
+	 self._voiceCoroutine = nil
+      end
    end
 end
 
