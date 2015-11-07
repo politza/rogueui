@@ -32,6 +32,6 @@ uninstall:
 	-rm -r -- "$(INVINC_INSTALL_DIR)/game/dlc/$(MOD_BASE_NAME)"
 
 run: install
-	cd $(INVINC_INSTALL_DIR)/game && { { [ -f Makefile ] && make; } || true; } && ../start.sh |\
+	cd $(INVINC_INSTALL_DIR)/game && ../start.sh |\
 		grep -i '\[rogueui\]\|\<warning\>\|\<error\>\|:[0-9]\+:' |\
 		sed -e 's/^[ \t]\(.*\.lua:[0-9]\+:.*\)/\1/'
