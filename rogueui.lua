@@ -378,6 +378,16 @@ teamPreview.onLoad = function (self)
       local select_loadout = self._panel.binder.agent1.binder.loadoutBtn1.binder.btn.onClick._fn
       local next_prog = self._panel.binder.program1.binder.arrowRight.binder.btn.onClick._fn
 
+      -- Deselect saved agents in-order to guaranty desired order.
+      local i = 0
+      for j = 1, #serverdefs.SELECTABLE_AGENTS do
+	 if j ~= agents[1] and j ~= agents[2] then
+	    select_agent (self, j)
+	    i = i + 1
+	    if i == 2 then break end
+	 end
+      end
+
       for i = 1, 2 do
 	 -- Select i'th program
 	 local cur = self._selectedPrograms[i]
