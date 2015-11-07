@@ -511,9 +511,11 @@ loading.onLoad =
       if not rogueui.settings.disable_confirm_mission_start.value then
 	 return
       end
+
       local t = self.loadThread
       while coroutine.status (t) ~= "dead"
-	 and (not debug.getinfo (t, 1, "n")
+	 and (loading.screen.binder.tipTxt:isSpooling ()
+		 or not debug.getinfo (t, 1, "n")
 		 or debug.getinfo (t, 1, "n").name ~= "waitForClick"
 	      or debug.getlocal (t, 1, 1) ~= "done") do
 	    coroutine.yield ()
