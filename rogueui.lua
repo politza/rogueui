@@ -369,7 +369,8 @@ teamPreview.onLoad = function (self)
 	 end
       end
    
-   if rogueui.settings.enable_save_selected_agency.value then
+   if (rogueui.settings.enable_save_selected_agency.value
+       and rogueui.selected_agency) then
       -- Restore the saved agency.
       local agents = rogueui.selected_agency.agents
       local loadouts = rogueui.selected_agency.loadouts
@@ -412,7 +413,7 @@ teamPreview.onLoad = function (self)
 end
 
 
-
+
 -------------------------
 -- DISABLE_INTRO_VIDEO --
 -------------------------
@@ -432,7 +433,7 @@ rogueui.settings.disable_intro_video.apply =
    end
 
 
-
+
 ------------------------------------
 -- DISABLE_AGENT_VOICE_OVER --
 ------------------------------------
@@ -453,7 +454,7 @@ MOAIFmodDesigner.playSound =
    end
 
 
-
+
 -----------------------------------
 -- DISABLE_MISSION_MODAL_CONVERSATIONS --
 -- DISABLE_MISSION_OBJECTIVES	 --
@@ -480,7 +481,7 @@ mission_panel.processEvent =
       return rogueui.originals.mission_panel.processEvent (self, event)
    end
 
-
+
 -------------------------
 -- DISABLE_MAP_SCRIPTS --
 -------------------------
@@ -495,7 +496,7 @@ mapScreen.PlayIntroScript =
       return rogueui.originals.mapScreen.PlayIntroScript (self)
    end
 
-
+
 ----------------------------------
 -- DISABLE_CONFIRM_MISSION_START --
 ----------------------------------
