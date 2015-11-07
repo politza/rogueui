@@ -24,7 +24,7 @@ local rogueui = {
       disable_i_am_ready_screen = {
 	 name = "Disable \"I am ready\" screen",
 	 -- Tooltip
-	 tip = "Inhibits displaying the screen immediately following the agency selection.", 
+	 tip = "Skips the screen immediately following the agency selection.", 
 	 -- Menu order
 	 ordinal = 10,
 	 -- Current value
@@ -332,63 +332,6 @@ end
 -- ENABLE_SAVE_SELECTED_AGENCY --
 ---------------------------------
 
--- states/state-team-preview.onClickCampaign
--- Removed "I am ready" screen code and inlined local functions.
-local function onClickCampaign(self)
-   MOAIFmodDesigner.stopSound("voice" )
-   if self._voiceCoroutine then
-      self._voiceCoroutine:stop()
-      self._voiceCoroutine = nil
-   end	
-
-   local agentIDs = {}
-   for k,v in ipairs(self._selectedAgents) do
-      local agentName = serverdefs.SELECTABLE_AGENTS[v]
-      local loadouts = serverdefs.LOADOUTS[ agentName ]
-      local agentTemplate = loadouts[ self._selectedLoadouts[k] ]
-      if metadefs.isRewardUnlocked( agentTemplate ) then
-	 agentIDs[k] = agentTemplate
-      else
-	 modalDialog.show( STRINGS.UI.TEAM_SELECT.LOCKED_LOADOUT )
-	 return
-      end
-   end
-
-   local programIDs = {}
-   for k, programName in ipairs(self._selectedPrograms) do
-      if metadefs.isRewardUnlocked( programName ) then
-	 programIDs[k] = programName
-      else
-	 modalDialog.show( STRINGS.UI.TEAM_SELECT.LOCKED_LOADOUT )
-	 return
-      end
-   end
-
-   local selectedAgency = serverdefs.createAgency( agentIDs, programIDs )
-   local campaign = serverdefs.createNewCampaign( selectedAgency,
-						  self._campaignDifficulty, self._campaignOptions )
-
-   local user = savefiles.getCurrentGame()
-   user.data.saveSlots[ user.data.currentSaveSlot ] = campaign
-   user.data.num_campaigns = (user.data.num_campaigns or 0) + 1
-   user.data.gamesStarted = true
-   user:save()
-
-   statemgr.deactivate( self )
-   MOAIFmodDesigner.playSound( cdefs.SOUND_HUD_GAME_WOOSHOUT )
-   MOAIFmodDesigner.stopSound("theme")
-
-   local stateMapScreen = include( "states/state-map-screen" )
-   statemgr.activate( stateMapScreen(), campaign )
-
-   if self._dialog then
-      self._dialog:close()
-      self._dialog = nil
-   end
-end
-
-rogueui.originals.teamPreview = {onLoad = teamPreview.onLoad}
-
 -- Remember selected agency.
 -- FIXME: Returning to the campaign screen does not save it.
 local function save_selected_agency (dialog)
@@ -400,46 +343,53 @@ local function save_selected_agency (dialog)
    settingsFile:save()
 end
 
+rogueui.originals.teamPreview = {onLoad = teamPreview.onLoad}
+
 teamPreview.onLoad = function (self)
    rogueui.originals.teamPreview.onLoad(self)
 
-   local original_handler = self._panel.binder.acceptBtn.onClick._fn
+   local accept_callback = self._panel.binder.acceptBtn.onClick._fn
    self._panel.binder.acceptBtn.onClick._fn =
       function ()
-	 save_selected_agency (self)
-	 if rogueui.settings.disable_i_am_ready_screen.value then
-	    onClickCampaign (self)
-	 else
-	    original_handler (self)
+	 if rogueui.settings.enable_save_selected_agency.value then
+	    save_selected_agency (self)
 	 end
+	 local secs = cdefs.SECONDS
+	 -- Speed-up fade in/out
+	 cdefs.SECONDS = 1
+	 accept_callback (self)
+	 if rogueui.settings.disable_i_am_ready_screen.value then
+	    local screen = find_active_screen ("modal-posttutorial.lua")
+	    if screen then
+	       screen.binder.closeBtn.onClick ()
+	    end
+	 end
+	 cdefs.SECONDS = secs
       end
    
-   if not rogueui.settings.enable_save_selected_agency.value
-   or not rogueui.selected_agency then
-      return
-   end
+   if rogueui.settings.enable_save_selected_agency.value then
+      -- Restore the saved agency.
+      local agents = rogueui.selected_agency.agents
+      local loadouts = rogueui.selected_agency.loadouts
+      local progs = rogueui.selected_agency.programs
+      local select_agent = self.screen:findWidget("agentListbox").onItemClicked._fn
+      local select_loadout = self._panel.binder.agent1.binder.loadoutBtn1.binder.btn.onClick._fn
+      local next_prog = self._panel.binder.program1.binder.arrowRight.binder.btn.onClick._fn
 
-   -- Restore the saved agency.
-   local agents = rogueui.selected_agency.agents
-   local loadouts = rogueui.selected_agency.loadouts
-   local progs = rogueui.selected_agency.programs
-   local select_agent = self.screen:findWidget("agentListbox").onItemClicked._fn
-   local select_loadout = self._panel.binder.agent1.binder.loadoutBtn1.binder.btn.onClick._fn
-   local next_prog = self._panel.binder.program1.binder.arrowRight.binder.btn.onClick._fn
-
-   for i = 1, 2 do
-      -- Select i'th program
-      local cur = self._selectedPrograms[i]
-      local first = cur
-      if cur ~= progs[i] then
-	 repeat
-	    next_prog (self, 1, i)
-	    cur = self._selectedPrograms[i]
-	 until cur == progs[i] or cur == first
+      for i = 1, 2 do
+	 -- Select i'th program
+	 local cur = self._selectedPrograms[i]
+	 local first = cur
+	 if cur ~= progs[i] then
+	    repeat
+	       next_prog (self, 1, i)
+	       cur = self._selectedPrograms[i]
+	    until cur == progs[i] or cur == first
+	 end
+	 -- Select i'th agent
+	 select_agent (self, agents[i])
+	 select_loadout (self, i, loadouts[i])
       end
-      -- Select i'th agent
-      select_agent (self, agents[i])
-      select_loadout (self, i, loadouts[i])
    end
 end
 
