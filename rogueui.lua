@@ -343,6 +343,50 @@ local function save_selected_agency (dialog)
    settingsFile:save()
 end
 
+local function restore_selected_agency (dialog)
+   if not rogueui.selected_agency then
+      return
+   end
+   -- Restore the saved agency.
+   local agents = rogueui.selected_agency.agents
+   local loadouts = rogueui.selected_agency.loadouts
+   local progs = rogueui.selected_agency.programs
+   local select_agent = dialog.screen:findWidget("agentListbox").onItemClicked._fn
+   local select_loadout = dialog._panel.binder.agent1.binder.loadoutBtn1.binder.btn.onClick._fn
+   local next_prog = dialog._panel.binder.program1.binder.arrowRight.binder.btn.onClick._fn
+
+   -- Deselect saved agents in-order to guaranty desired order.
+   local i = 0
+   for j = 3, #serverdefs.SELECTABLE_AGENTS do
+      if j ~= agents[1] and j ~= agents[2] then
+	 select_agent (dialog, j)
+	 i = i + 1
+	 if i == 2 then break end
+      end
+   end
+
+   for i = 1, 2 do
+      -- Select i'th program
+      local cur = dialog._selectedPrograms[i]
+      local first = cur
+      if cur ~= progs[i] then
+	 repeat
+	    next_prog (dialog, 1, i)
+	    cur = dialog._selectedPrograms[i]
+	 until cur == progs[i] or cur == first
+      end
+      -- Select i'th agent
+      select_agent (dialog, agents[i])
+      select_loadout (dialog, i, loadouts[i])
+   end
+   -- Stop central's voice-over
+   MOAIFmodDesigner.stopSound("voice")
+   if dialog._voiceCoroutine then
+      dialog._voiceCoroutine:stop()
+      dialog._voiceCoroutine = nil
+   end
+end
+   
 rogueui.originals.teamPreview = {onLoad = teamPreview.onLoad}
 
 teamPreview.onLoad = function (self)
@@ -369,46 +413,8 @@ teamPreview.onLoad = function (self)
 	 end
       end
    
-   if (rogueui.settings.enable_save_selected_agency.value
-       and rogueui.selected_agency) then
-      -- Restore the saved agency.
-      local agents = rogueui.selected_agency.agents
-      local loadouts = rogueui.selected_agency.loadouts
-      local progs = rogueui.selected_agency.programs
-      local select_agent = self.screen:findWidget("agentListbox").onItemClicked._fn
-      local select_loadout = self._panel.binder.agent1.binder.loadoutBtn1.binder.btn.onClick._fn
-      local next_prog = self._panel.binder.program1.binder.arrowRight.binder.btn.onClick._fn
-
-      -- Deselect saved agents in-order to guaranty desired order.
-      local i = 0
-      for j = 3, #serverdefs.SELECTABLE_AGENTS do
-	 if j ~= agents[1] and j ~= agents[2] then
-	    select_agent (self, j)
-	    i = i + 1
-	    if i == 2 then break end
-	 end
-      end
-
-      for i = 1, 2 do
-	 -- Select i'th program
-	 local cur = self._selectedPrograms[i]
-	 local first = cur
-	 if cur ~= progs[i] then
-	    repeat
-	       next_prog (self, 1, i)
-	       cur = self._selectedPrograms[i]
-	    until cur == progs[i] or cur == first
-	 end
-	 -- Select i'th agent
-	 select_agent (self, agents[i])
-	 select_loadout (self, i, loadouts[i])
-      end
-      -- Stop central's voice-over
-      MOAIFmodDesigner.stopSound("voice")
-      if self._voiceCoroutine then
-	 self._voiceCoroutine:stop()
-	 self._voiceCoroutine = nil
-      end
+   if rogueui.settings.enable_save_selected_agency.value then
+      restore_selected_agency (self)
    end
 end
 
