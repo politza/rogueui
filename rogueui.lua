@@ -381,7 +381,7 @@ teamPreview.onLoad = function (self)
 
       -- Deselect saved agents in-order to guaranty desired order.
       local i = 0
-      for j = 1, #serverdefs.SELECTABLE_AGENTS do
+      for j = 3, #serverdefs.SELECTABLE_AGENTS do
 	 if j ~= agents[1] and j ~= agents[2] then
 	    select_agent (self, j)
 	    i = i + 1
