@@ -436,6 +436,7 @@ rogueui.originals.MOAIFmodDesigner = {playSound = MOAIFmodDesigner.playSound}
 MOAIFmodDesigner.playSound =
    function (resource, category)
       if rogueui.settings.disable_ingame_voice_over.value and
+	 category ~= "voice" and
 	 string.match (resource, "/VoiceOver/")
       then return
       elseif rogueui.settings.disable_agent_voice_over.value and
