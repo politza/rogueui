@@ -354,17 +354,19 @@ teamPreview.onLoad = function (self)
 	 if rogueui.settings.enable_save_selected_agency.value then
 	    save_selected_agency (self)
 	 end
-	 local secs = cdefs.SECONDS
-	 -- Speed-up fade in/out
-	 cdefs.SECONDS = 1
-	 accept_callback (self)
 	 if rogueui.settings.disable_i_am_ready_screen.value then
+	    local secs = cdefs.SECONDS
+	    -- Speed-up fade in/out
+	    cdefs.SECONDS = 1
+	    accept_callback (self)
 	    local screen = find_active_screen ("modal-posttutorial.lua")
 	    if screen then
 	       screen.binder.closeBtn.onClick ()
 	    end
+	    cdefs.SECONDS = secs
+	 else
+	    accept_callback (self)
 	 end
-	 cdefs.SECONDS = secs
       end
    
    if rogueui.settings.enable_save_selected_agency.value then
