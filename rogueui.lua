@@ -24,7 +24,7 @@ local rogueui = {
       disable_i_am_ready_screen = {
 	 name = "Disable \"I am ready\" screen",
 	 -- Tooltip
-	 tip = "Skips the screen immediately following the agency selection.", 
+	 tip = "Whether to display the screen immediately following the agency selection.", 
 	 -- Menu order
 	 ordinal = 10,
 	 -- Current value
@@ -69,8 +69,8 @@ local rogueui = {
 	 value = false
       },
       disable_ingame_voice_over = {
-	 name = "Disable all ingame voice-over",
-	 tip = "Whether to play any voice-over.",
+	 name = "Disable in-game voice-over",
+	 tip = "Whether to play in-game voice-over.",
 	 ordinal = 60,
 	 value = false
       },
