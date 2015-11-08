@@ -415,6 +415,12 @@ teamPreview.onLoad = function (self)
    
    if rogueui.settings.enable_save_selected_agency.value then
       restore_selected_agency (self)
+      local cancel_callback = self._panel.binder.cancelBtn.onClick._fn
+      self._panel.binder.cancelBtn.onClick._fn =
+	 function ()
+	    save_selected_agency (self)
+	    cancel_callback (self)
+	 end
    end
 end
 
